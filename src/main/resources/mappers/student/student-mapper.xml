@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--
+	 mapper태그에 namespace속성을 설정해야한다
+	 namespace값은 session객체가 sql문을 메소드에 의해 실행할때 사용하는 mapper구분 값이다
+ -->
+<mapper namespace="student">
+	<!-- 
+		실행할 sql문에 맞는 태그를 선언
+		<select><insert><update><delete>
+		sql문은 시작태그와 끝태그 사이에 작성한다 세미콜론(;)은 생략한다
+	 -->
+	 <insert id="insertStudent">
+	 	INSERT INTO STUDENT VALUES(SEQ_STUDENT.NEXTVAL,
+	 	'유병승','01012341234','YOO@YOO.COM','경기도시흥시',DEFAULT)
+	 </insert>
+	 
+	 
+	 <!--
+	 	매개변수가 있는 메소드 실행 시 sql태그에 parameterType속성을 이용해서 매개변수 타입(별칭)을 설정 
+	 	매개변수값은 #{매개변수명}으로 전달받는다	
+	 -->
+	 <insert id="insertStudentByName" parameterType="string">
+	 	INSERT INTO STUDENT VALUES(SEQ_STUDENT.NEXTVAL,
+	 	#{name},'01012341234','YOO@YOO.COM','경기도시흥시',DEFAULT)
+	 </insert>
+	 
+	 <!-- 
+	 	type을 작성할 때 class를 매개변수를 받으려면 패키지명까지 작성해줘야 한다
+	 	매개변수값은 #{필드명}으로 전달받는다
+	  -->
+	 <insert id="insertStudentAll" parameterType="com.mybatis.model.vo.Student">
+	 	INSERT INTO STUDENT VALUES(SEQ_STUDENT.NEXTVAL,
+	 	#{studentName},#{studentTel},#{studentEmail},#{studentAddr},DEFAULT)
+	 </insert>
+	 
+	 <update id="updateStudent" parameterType="com.mybatis.model.vo.Student">
+	 	UPDATE STUDENT SET STUDENT_NAME=#{studentName},STUDENT_TEL=#{studentTel},
+	 	STUDENT_EMAIL=#{studentEmail},STUDENT_ADDR=#{studentAddr} WHERE STUDENT_NO=#{studentNo}
+	 </update>
+	 
+	 <delete id="deleteStudent" parameterType="_int">
+	 	DELETE STUDENT WHERE STUDENT_NO=#{studentNo}
+	 </delete>
+	 <!-- 
+	 	select문 실행
+	 	<select>태그 이용하고 반드시 두개의 속성을 지정
+	 	1. id -> sql문의 key값
+	 	2. resultType || resultMap -> 쿼리문의 실행결과를 반환할 타입
+	 		-resultType : java코드로 작성되어 있는 타입 (기본, 클래스타입)
+	 		-resultMap : mybatis에서 <resultMap>을 이용해서 만든 타입
+	 		
+	 		*컬럼명과 매핑할 java 클래스 필드명이 같으면 resultType을 사용,
+	 		다르면 resultMap을 만들어서 직접 매핑해준다
+	 		*resultMap은 클래스간의 연관관계( has a )를 설정했을때 사용
+	  -->
+	 <select id="selectStudentCount" resultType="_int">
+	 	SELECT COUNT(*) FROM STUDENT
+	 </select>
+	 <!-- 
+	 	vo객체와 resultset의 컬럼명이 불일치할때 resultMap을 이용해서 매핑시켜줄 수 있다
+	 	<resultMap id="" type="">
+		 	<id property="type에 설정된 객체의 필드명" colum="resultset 컬럼명"> pk는 id로 설정
+		 	<result property="" colum=""> pk제외 컬럼은 result 설정
+		 	<associtation>
+		 	<collection>
+	  -->
+	  <resultMap type="com.mybatis.model.vo.Student" id="studentMap">
+	  	<id property="studentNo" column="STUDENT_NO"/> <!-- pk는 id로 설정 -->
+	  	<result property="studentName" column="STUDENT_NAME"/><!-- pk제외 컬럼은 result 설정 -->
+	  	<result property="studentTel" column="STUDENT_TEL"/>
+	  	<result property="studentEmail" column="STUDENT_EMAIL"/>
+	  	<result property="studentAddr" column="STUDENT_ADDR"/>
+	  </resultMap>	  
+	  
+	 <select id="selectStudent" resultMap="studentMap" parameterType="_int">
+	 	SELECT *
+	 	FROM STUDENT
+	 	WHERE STUDENT_NO=#{studentNo}
+	 </select>
+	 
+	  <select id="selectStudentAll" resultMap="studentMap">
+	 	SELECT *
+	 	FROM STUDENT
+	 </select>
+	 
+	 <select id="selectStudentByName" resultMap="studentMap" parameterType="string">
+	 	SELECT *
+	 	FROM STUDENT
+	 	WHERE STUDENT_NAME LIKE '%'||#{name}||'%'
+	 </select>
+	 
+	 <select id="selectStudentMap" parameterType="_int" resultType="Map">
+	 	SELECT *
+	 	FROM STUDENT
+	 	WHERE STUDENT_NO=#{studentNo}
+	 </select>
+	 
+	 <select id="selectStudentListMap" resultType="Map">
+	 	SELECT *
+	 	FROM STUDENT
+	 </select>
+	 
+	 <select id="selectStudentPage" resultMap="studentMap" >
+	 	SELECT *
+	 	FROM STUDENT
+	 </select>
+</mapper>
